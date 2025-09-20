@@ -1,0 +1,14 @@
+{
+  "name": "sync-to-google",
+  "version": "1.0.0",
+  "description": "This project aims to watch a directory for newly created files and upload them as soon as they appear.\r The upload should start even before the file has finished being written to decrease latency.\r The system does not need to support altering existing files on the remote side since only new data will be appended.\r The system should have a configurable retention period which will remove items from the remote side.\r For now the remote side is a Google Storage bucket written by the node SDK.\r The local side is some configurable directory.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
