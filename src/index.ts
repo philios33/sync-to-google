@@ -21,10 +21,10 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     }
     console.log(new Date(), 'Starting up...', config);
     // Get the remote state of the remote storage
-    const gca = new GoogleCloudAdaptor('phil-backup-bucket-eu', '/meadow_cctv/');
+    const gca = new GoogleCloudAdaptor(config.remoteGoogleBucket, config.remotePath);
     const remoteState = await gca.getExistingFiles();
 
-    const sm = new SyncManager(path.join(__dirname, '..', 'test'));
+    const sm = new SyncManager(path.join(__dirname, config.localPath));
 
     const doShutdown = (reason: string) => {
         console.log(new Date(), 'Doing shutdown...', reason);
