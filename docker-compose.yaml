@@ -1,0 +1,10 @@
+services:
+  sync2google:
+    container_name: sync2google
+    privileged: true # this may not be necessary for all setups
+    restart: always
+    build: .
+    volumes:
+      - /app/keys:/mnt/c/repos/personal/sync-to-google/keys:ro
+      - /app/test:/mnt/c/repos/personal/sync-to-google/test:ro
+      - /app/dist/.env:/mnt/c/repos/personal/sync-to-google/.env:ro
