@@ -9,5 +9,5 @@ The local side is some configurable directory.
 
 npm run build
 
-GOOGLE_APPLICATION_CREDENTIALS=/mnt/c/repos/personal/sync-to-google/keys/cctv-sync.json node ./dist/index.js
+node ./dist/index.js
 

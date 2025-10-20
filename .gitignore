@@ -4,3 +4,4 @@ dist
 /keys
 /keys/*
 /test
+.env

@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import * as process from 'node:process';
 import SyncManager from './syncManager';
 import GoogleCloudAdaptor from './googleCloudAdaptor';
@@ -10,7 +11,15 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
 }
 
 (async () => {
-    console.log(new Date(), 'Starting up...');
+    const config = {
+        remoteGoogleBucket: process.env.REMOTE_GOOGLE_BUCKET || null,
+        remotePath: process.env.REMOTE_PATH || '/meadow_cctv/',
+        localPath: process.env.LOCAL_PATH || '../test'
+    }
+    if (config.remoteGoogleBucket === null) {
+        throw new Error('Please specify process.env.REMOTE_GOOGLE_BUCKET in .env file');
+    }
+    console.log(new Date(), 'Starting up...', config);
     // Get the remote state of the remote storage
     const gca = new GoogleCloudAdaptor('phil-backup-bucket-eu', '/meadow_cctv/');
     const remoteState = await gca.getExistingFiles();
