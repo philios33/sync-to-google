@@ -1,0 +1,40 @@
+import * as process from 'node:process';
+import SyncManager from './syncManager';
+import GoogleCloudAdaptor from './googleCloudAdaptor';
+import * as path from 'path';
+
+const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
+    process.on('SIGINT', () => {
+        shutdownFunc.call(this, 'SIGINT detected');
+    })
+}
+
+(async () => {
+    console.log(new Date(), 'Starting up...');
+    // Get the remote state of the remote storage
+    const gca = new GoogleCloudAdaptor('phil-backup-bucket-eu', '/meadow_cctv/');
+    const remoteState = await gca.getExistingFiles();
+
+    const sm = new SyncManager(path.join(__dirname, '..', 'test'));
+
+    const doShutdown = (reason: string) => {
+        console.log(new Date(), 'Doing shutdown...', reason);
+        sm.shutdown();
+    }
+
+    sm.watchForNewOrUpdatedFiles(async (fullPath, relativePath) => {
+        // console.log('This path has changed, upload it', relativePath);
+        try {
+            await gca.uploadFileToPath(fullPath, relativePath)
+        } catch(err) {
+            console.error(err);
+            doShutdown('Error occurred: ' + (err as Error).message);
+        }
+    });
+    sm.startup(remoteState);
+
+    registerGracefulShutdown(doShutdown);
+
+    console.log(new Date(), 'Started');
+})();
+
