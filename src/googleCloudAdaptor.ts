@@ -1,4 +1,4 @@
-import { Storage } from '@google-cloud/storage';
+import { Storage, File } from '@google-cloud/storage';
 import { RState } from './types';
 import * as path from 'path';
 
@@ -25,20 +25,40 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
     async getExistingFiles() : Promise<RState> {
         const bucket = this.storage.bucket(this.bucketName);
         
+        /*
         const [files] = await bucket.getFiles({
             autoPaginate: true, // Pagination is handled automatically
-            prefix: this.relativePath
+            prefix: this.relativePath,
+            maxResults: 1000,
         });
+        */
 
+
+        const files = await new Promise<Array<File>>((resolve, reject) => {
+            const files: Array<File> = [];
+            bucket.getFilesStream()
+            .on('error', (err) => reject(err))
+            .on('data', function(file: File) {
+                // file is a File object.
+                console.log('Received file', file.name);
+                files.push(file);
+            })
+            .on('end', function() {
+                // All files retrieved.
+                console.log('Resolving with', files.length);
+                resolve(files);
+            });
+        })
+        
         const state: RState = {}
         for (const file of files) {
-            const meta = await file.getMetadata();
+            const meta = file.metadata;
             if (file.name.startsWith(this.relativePath)) {
                 const name = file.name.substring(this.relativePath.length);
                 state[name] = {
                     relativePath: name,
-                    hash: Buffer.from(meta[0].md5Hash || '', 'base64').toString('hex'),
-                    size: parseInt(meta[0].size?.toString() || '0'),
+                    hash: Buffer.from(meta.md5Hash || '', 'base64').toString('hex'),
+                    size: parseInt(meta.size?.toString() || '0'),
                 }
             } else {
                 throw new Error('Why doesnt it');
