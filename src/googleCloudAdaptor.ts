@@ -33,14 +33,17 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
         });
         */
 
-
+        console.log('Fetching existing remote files...');
         const files = await new Promise<Array<File>>((resolve, reject) => {
             const files: Array<File> = [];
-            bucket.getFilesStream()
+            bucket.getFilesStream({
+                prefix: this.relativePath,
+                fields: '*'
+            })
             .on('error', (err) => reject(err))
             .on('data', function(file: File) {
                 // file is a File object.
-                console.log('Received file', file.name);
+                // console.log('Received file', files.length);
                 files.push(file);
             })
             .on('end', function() {
@@ -52,7 +55,7 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
         
         const state: RState = {}
         for (const file of files) {
-            const meta = file.metadata;
+            const meta = file as any;
             if (file.name.startsWith(this.relativePath)) {
                 const name = file.name.substring(this.relativePath.length);
                 state[name] = {
@@ -64,7 +67,7 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
                 throw new Error('Why doesnt it');
             }
         }
-        // console.log('Returning RState', state);
+        console.log('Returning RState', Object.values(state)[0]);
         return state
     }
 
