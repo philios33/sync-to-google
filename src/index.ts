@@ -3,6 +3,7 @@ import * as process from 'node:process';
 import SyncManager from './syncManager';
 import GoogleCloudAdaptor from './googleCloudAdaptor';
 import * as path from 'path';
+import ParallelExecutor from './parallelExecutor';
 
 const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     process.on('SIGINT', () => {
@@ -24,17 +25,24 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     const gca = new GoogleCloudAdaptor(config.remoteGoogleBucket, config.remotePath);
     const remoteState = await gca.getExistingFiles();
 
+    const executor = new ParallelExecutor(2);
+    executor.startup();
+
     const sm = new SyncManager(path.join(__dirname, config.localPath));
 
     const doShutdown = (reason: string) => {
         console.log(new Date(), 'Doing shutdown...', reason);
+        executor.shutdown();
         sm.shutdown();
     }
 
     sm.watchForNewOrUpdatedFiles(async (fullPath, relativePath) => {
         // console.log('This path has changed, upload it', relativePath);
+        // This will flood so we need to batch up the promises
         try {
-            await gca.uploadFileToPath(fullPath, relativePath)
+            executor.enqueueJob(async () => {
+                await gca.uploadFileToPath(fullPath, relativePath)
+            });
         } catch(err) {
             console.error(err);
             doShutdown('Error occurred: ' + (err as Error).message);
