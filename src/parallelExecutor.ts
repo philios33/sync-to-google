@@ -39,7 +39,7 @@ export default class ParallelExecutor {
                     this.running = false;
                 }
             }
-        }, 5000);
+        }, 60 * 1000);
     }
 
     shutdown() {
@@ -51,6 +51,7 @@ export default class ParallelExecutor {
     enqueueJob(job: () => Promise<any>) {
         this.allJobs.push(job);
         this.trigger = true;
+        console.log('There are now ' + this.allJobs.length + ' jobs queued up');
     }
 
 
