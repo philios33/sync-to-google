@@ -45,7 +45,7 @@ export default class SyncManager {
     startup(remoteState: RState) {
         this.remoteState = remoteState;
         
-        this.watcher = chokidar.watch(this.localPath).on('all', (event, path) => {
+        this.watcher = chokidar.watch(this.localPath, {alwaysStat: false}).on('all', (event, path) => {
             if (path.startsWith(this.localPath)) {
                 path = path.substring(this.localPath.length + 1);
             } else {
@@ -54,7 +54,7 @@ export default class SyncManager {
             if (event === 'add' || event === 'change') {
                 this.registerFile(path);
             }
-            // console.log(event, path);
+            console.log(event, path);
         });
     }
 
