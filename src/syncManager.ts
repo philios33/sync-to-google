@@ -28,6 +28,7 @@ export default class SyncManager {
     files: Record<string, any>;
     callback: (fullPath: string, relativePath: string) => Promise<void>;
     remoteState: RState;
+    num: number;
     
     constructor(localPath: string, /*adaptor: ICloudAdaptor*/) {
         this.localPath = fs.realpathSync(localPath);
@@ -36,6 +37,7 @@ export default class SyncManager {
         this.files = {};
         this.callback = async (fullPath: string, relativePath: string) => {}
         this.remoteState = {};
+        this.num = 0;
     }
 
     /**
@@ -54,7 +56,8 @@ export default class SyncManager {
             if (event === 'add' || event === 'change') {
                 this.registerFile(path);
             }
-            console.log(event, path);
+            this.num++;
+            console.log(event, path, this.num);
         });
     }
 

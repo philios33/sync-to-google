@@ -39,7 +39,7 @@ export default class ParallelExecutor {
                     this.running = false;
                 }
             }
-        }, 60 * 1000);
+        }, 120 * 1000);
     }
 
     shutdown() {
