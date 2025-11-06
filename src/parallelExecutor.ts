@@ -27,19 +27,24 @@ export default class ParallelExecutor {
         console.log('Starting up ' + this.threads + ' uploading threads');
 
         this.interval = setInterval(async () => {
-            if (!this.running && this.trigger) {
-                this.running = true;
-                this.trigger = false;
-                try {
-                    await Promise.all(this.executors.map(e => e.trigger()))
-                } catch(err) {
-                    console.error(err);
-                    process.exit(1);
-                } finally {
-                    this.running = false;
-                }
+            this.cycle();
+        }, 10 * 1000);
+        this.cycle();
+    }
+
+    async cycle() {
+        if (!this.running && this.trigger) {
+            this.running = true;
+            this.trigger = false;
+            try {
+                await Promise.all(this.executors.map(e => e.trigger()))
+            } catch(err) {
+                console.error(err);
+                process.exit(1);
+            } finally {
+                this.running = false;
             }
-        }, 120 * 1000);
+        }
     }
 
     shutdown() {

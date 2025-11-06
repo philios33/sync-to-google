@@ -1,4 +1,4 @@
-import chokidar, { FSWatcher } from 'chokidar';
+import chokidar, { FSWatcher, Matcher } from 'chokidar';
 import * as fs from 'fs';
 import { RState } from './types';
 import * as crypto from 'crypto';
@@ -44,10 +44,12 @@ export default class SyncManager {
      * This takes in a remote state so we don't duplicate triggering writes to the same files!
      * @param remoteState The state of all the existing remote files
      */
-    startup(remoteState: RState) {
+    startup(remoteState: RState, readyFunc: () => void) {
         this.remoteState = remoteState;
         
-        this.watcher = chokidar.watch(this.localPath, {alwaysStat: false}).on('all', (event, path) => {
+        this.watcher = chokidar.watch(this.localPath).on('all', (event, path) => {
+            this.num++;
+            console.log('ALL', event, path, this.num);
             if (path.startsWith(this.localPath)) {
                 path = path.substring(this.localPath.length + 1);
             } else {
@@ -56,8 +58,9 @@ export default class SyncManager {
             if (event === 'add' || event === 'change') {
                 this.registerFile(path);
             }
-            this.num++;
-            console.log(event, path, this.num);
+        }).on('ready', () => {
+            console.log('Chokidar is ready!');
+            readyFunc.call(this);
         });
     }
 

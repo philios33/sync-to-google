@@ -26,7 +26,7 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     const remoteState = await gca.getExistingFiles();
 
     const executor = new ParallelExecutor(2);
-    executor.startup();
+    
 
     const sm = new SyncManager(path.join(__dirname, config.localPath));
 
@@ -35,6 +35,15 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
         executor.shutdown();
         sm.shutdown();
     }
+
+    // TODO: This has proven to be an issue with the number of file watchers.
+    // We can't and probably shouldn't watch on every file.
+    // Can we continue to watch on every dir? so we get new file events?
+
+    // We can do an initial scan using a normal fs scan.
+
+    // Otherwise: We need to detect the ISO date dir and decide if we need full file watching or not
+    // Or do some kind
 
     sm.watchForNewOrUpdatedFiles(async (fullPath, relativePath) => {
         // console.log('This path has changed, upload it', relativePath);
@@ -48,7 +57,9 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
             doShutdown('Error occurred: ' + (err as Error).message);
         }
     });
-    sm.startup(remoteState);
+    sm.startup(remoteState, () => {
+        executor.startup();
+    });
 
     registerGracefulShutdown(doShutdown);
 
