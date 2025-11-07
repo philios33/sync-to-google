@@ -14,6 +14,8 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
     // const md5 = await md5sum(path)
     // https://stackoverflow.com/a/44643479/10440128
     return new Promise((resolve, reject) => {
+      resolve('01872408712408172401872408172408');
+      /*
       const hash = crypto.createHash('md5')
       const stream = fs.createReadStream(path)
       stream.on('error', err => reject(err))
@@ -24,6 +26,7 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
         stream.destroy();
         hash.destroy();
       })
+      */
     })
   }
 
@@ -88,10 +91,12 @@ export default class SyncManager {
         } else {
             // Should we upload?
             const existing = this.remoteState[relativeFilePath];
+            /*
             if (existing?.hash !== md5Hash) {
                 // console.log('Hash differs', existing?.hash, md5Hash);
                 upload = true;
             }
+            */
             if (existing?.size !== stats.size) {
                 // console.log('Size differs', existing?.size, stats.size);
                 upload = true;
