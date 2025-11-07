@@ -96,6 +96,20 @@ export default class SyncManager {
     }
 
     private async registerFile(relativeFilePath: string) {
+        const now = new Date();
+        const creationDate = /^(\d{4})-(\d{2})-(\d{2})\//
+        const matches = creationDate.exec(relativeFilePath);
+        if (matches) {
+            const year = parseInt(matches[1] || '');
+            const month = parseInt(matches[2] || '');
+            const day = parseInt(matches[3] || '');
+            const createdDate = new Date(year, month - 1, day);
+            const ageSecs = Math.round((now.getTime() - createdDate.getTime()) / 1000);
+            console.log(relativeFilePath, createdDate, ageSecs);
+        } else {
+            console.log('Did not match regexp: ' + relativeFilePath);
+        }
+
         // Read the size and last modified time of this file and POST back as an event.
         const filePath = path.join(this.localPath, relativeFilePath);
         const stats = fs.statSync(filePath);

@@ -7,10 +7,11 @@ The system should have a configurable retention period which will remove items f
 For now the remote side is a Google Storage bucket written by the node SDK.
 The local side is some configurable directory.
 
-# Rethink
+# Deleting files
 
-We need to rethink how we do this because hashing all files in FS takes up too much memory.
-
+We need to physically look for files in a remote folder going back x days.
+We need to make sure that OLD files that are deleted on remote and NOT resynced.
+    To do that we need to think about what age the file is.
 
 npm run build
 
