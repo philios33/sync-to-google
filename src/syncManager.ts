@@ -1,8 +1,10 @@
 import chokidar, { FSWatcher, Matcher } from 'chokidar';
 import * as fs from 'fs';
 import { RState } from './types';
-import * as crypto from 'crypto';
+// import * as crypto from 'crypto';
 import * as path from 'path';
+
+import { sync as md5File } from 'md5-file';
 
 /**
  * This will get all local files and all remote files 
@@ -11,8 +13,11 @@ import * as path from 'path';
  */
 
 const generateFileMD5 = async (path: string) : Promise<string> => {
+    return Promise.resolve(md5File(path));
+
     // const md5 = await md5sum(path)
     // https://stackoverflow.com/a/44643479/10440128
+    /*
     return new Promise((resolve, reject) => {
       let hash: crypto.Hash | null = crypto.createHash('md5')
       let stream: fs.ReadStream | null = fs.createReadStream(path)
@@ -45,6 +50,7 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
         }
       })
     })
+    */
   }
 
 export default class SyncManager {
@@ -98,6 +104,7 @@ export default class SyncManager {
         const filePath = path.join(this.localPath, relativeFilePath);
         const stats = fs.statSync(filePath);
         const md5Hash = await generateFileMD5(filePath);
+        // console.log('MD5 hash was', md5Hash);
 
         // Determine whether we should write this file
         let upload = false;

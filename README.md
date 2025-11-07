@@ -7,6 +7,11 @@ The system should have a configurable retention period which will remove items f
 For now the remote side is a Google Storage bucket written by the node SDK.
 The local side is some configurable directory.
 
+# Rethink
+
+We need to rethink how we do this because hashing all files in FS takes up too much memory.
+
+
 npm run build
 
 node ./dist/index.js
