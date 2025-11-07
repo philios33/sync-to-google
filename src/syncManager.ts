@@ -14,19 +14,36 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
     // const md5 = await md5sum(path)
     // https://stackoverflow.com/a/44643479/10440128
     return new Promise((resolve, reject) => {
-      resolve('01872408712408172401872408172408');
-      /*
-      const hash = crypto.createHash('md5')
-      const stream = fs.createReadStream(path)
-      stream.on('error', err => reject(err))
-      stream.on('data', chunk => hash.update(chunk))
-      stream.on('end', () => {
-        resolve(hash.digest('hex'));
-        stream.close();
-        stream.destroy();
-        hash.destroy();
+      let hash: crypto.Hash | null = crypto.createHash('md5')
+      let stream: fs.ReadStream | null = fs.createReadStream(path)
+      const cleanup = () => {
+        if (stream) {
+            stream.removeAllListeners();
+            stream.close();
+            stream.destroy();
+            stream = null;
+        }
+        if (hash) {
+            hash.removeAllListeners();
+            hash.destroy();
+            hash = null;
+        }
+      }
+      stream.on('error', err => {
+        cleanup();
+        reject(err);
       })
-      */
+      stream.on('data', chunk => hash?.update(chunk))
+      stream.on('end', () => {
+        if (hash) {
+            const result = hash.digest('hex');
+            cleanup();
+            resolve(result);
+        } else {
+            cleanup();
+            reject(new Error('Hash invalid'));
+        }
+      })
     })
   }
 
