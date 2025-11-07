@@ -21,7 +21,7 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
       stream.on('end', () => {
         resolve(hash.digest('hex'));
         stream.close();
-        // stream.destroy();
+        stream.destroy();
         hash.destroy();
       })
     })
@@ -65,6 +65,10 @@ export default class SyncManager {
             }
         }).on('ready', () => {
             console.log('Chokidar is ready!');
+            
+            // @ts-ignore
+            gc();
+
             readyFunc.call(this);
         });
     }
@@ -75,9 +79,6 @@ export default class SyncManager {
         const stats = fs.statSync(filePath);
         const md5Hash = await generateFileMD5(filePath);
 
-        // @ts-ignore
-        gc();
-        
         // Determine whether we should write this file
         let upload = false;
         if (!(relativeFilePath in this.remoteState)) {
