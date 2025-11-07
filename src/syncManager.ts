@@ -18,7 +18,10 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
       const stream = fs.createReadStream(path)
       stream.on('error', err => reject(err))
       stream.on('data', chunk => hash.update(chunk))
-      stream.on('end', () => resolve(hash.digest('hex')))
+      stream.on('end', () => {
+        resolve(hash.digest('hex'));
+        stream.close();
+      })
     })
   }
 
@@ -68,7 +71,7 @@ export default class SyncManager {
         // Read the size and last modified time of this file and POST back as an event.
         const filePath = path.join(this.localPath, relativeFilePath);
         const stats = fs.statSync(filePath);
-        // const md5Hash = await generateFileMD5(filePath);
+        const md5Hash = await generateFileMD5(filePath);
 
         // Determine whether we should write this file
         let upload = false;
@@ -79,12 +82,10 @@ export default class SyncManager {
         } else {
             // Should we upload?
             const existing = this.remoteState[relativeFilePath];
-            /*
             if (existing?.hash !== md5Hash) {
                 // console.log('Hash differs', existing?.hash, md5Hash);
                 upload = true;
             }
-            */
             if (existing?.size !== stats.size) {
                 // console.log('Size differs', existing?.size, stats.size);
                 upload = true;
@@ -95,8 +96,7 @@ export default class SyncManager {
             this.remoteState[relativeFilePath] = {
                 relativePath: relativeFilePath,
                 size: stats.size,
-                // hash: md5Hash
-                hash: 'nohash',
+                hash: md5Hash
             }
             this.callback.apply(this, [filePath, relativeFilePath]);
         }
