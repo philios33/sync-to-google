@@ -91,10 +91,6 @@ export default class SyncManager {
             }
         }).on('ready', () => {
             console.log('Chokidar is ready!');
-            
-            // @ts-ignore
-            gc();
-
             readyFunc.call(this);
         });
     }
@@ -115,12 +111,10 @@ export default class SyncManager {
         } else {
             // Should we upload?
             const existing = this.remoteState[relativeFilePath];
-            /*
             if (existing?.hash !== md5Hash) {
                 // console.log('Hash differs', existing?.hash, md5Hash);
                 upload = true;
             }
-            */
             if (existing?.size !== stats.size) {
                 // console.log('Size differs', existing?.size, stats.size);
                 upload = true;
