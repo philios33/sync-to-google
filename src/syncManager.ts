@@ -21,6 +21,7 @@ const generateFileMD5 = async (path: string) : Promise<string> => {
       stream.on('end', () => {
         resolve(hash.digest('hex'));
         stream.close();
+        hash.destroy();
       })
     })
   }
