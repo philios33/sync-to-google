@@ -48,6 +48,9 @@ export default class ParallelExecutor {
     }
 
     shutdown() {
+        for (const executor of this.executors) {
+            executor.shutdown();
+        }
         if (this.interval) {
             clearInterval(this.interval);
         }

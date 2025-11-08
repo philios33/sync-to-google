@@ -79,7 +79,13 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
         console.log(new Date(), 'Successfully uploaded', fullPath);
     }
 
-    async deleteFilesForDate(dateString: string) {
+    async deleteFileAtPath(relativePath: string) : Promise<void> {
+        console.log(new Date(), 'Deleting...', relativePath);
+        await this.storage.bucket(this.bucketName).file(relativePath).delete();
+        console.log(new Date(), 'Successfully deleted', relativePath);
+    }
+
+    async getFilesForDate(dateString: string) {
         const bucket = this.storage.bucket(this.bucketName);
         const files = await new Promise<Array<File>>((resolve, reject) => {
             const files: Array<File> = [];
@@ -100,9 +106,7 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
                 resolve(files);
             });
         })
-        for (const file of files) {
-            console.log('Considering this file for deletion', file.name);
-        }
+        return files;
     }
 
 }
