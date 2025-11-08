@@ -79,4 +79,30 @@ export default class GoogleCloudAdaptor implements ICloudAdaptor {
         console.log(new Date(), 'Successfully uploaded', fullPath);
     }
 
+    async deleteFilesForDate(dateString: string) {
+        const bucket = this.storage.bucket(this.bucketName);
+        const files = await new Promise<Array<File>>((resolve, reject) => {
+            const files: Array<File> = [];
+            console.log('Prefix', this.relativePath + dateString);
+            bucket.getFilesStream({
+                prefix: this.relativePath + dateString,
+                fields: '*'
+            })
+            .on('error', (err) => reject(err))
+            .on('data', function(file: File) {
+                // file is a File object.
+                // console.log('Received file', files.length);
+                files.push(file);
+            })
+            .on('end', function() {
+                // All files retrieved.
+                console.log('Resolving with', files.length);
+                resolve(files);
+            });
+        })
+        for (const file of files) {
+            console.log('Considering this file for deletion', file.name);
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ import SyncManager from './syncManager';
 import GoogleCloudAdaptor from './googleCloudAdaptor';
 import * as path from 'path';
 import ParallelExecutor from './parallelExecutor';
+import { cleanupRoutine } from './cleanupRoutine';
 
 const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     process.on('SIGINT', () => {
@@ -23,6 +24,12 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
     console.log(new Date(), 'Starting up...', config);
     // Get the remote state of the remote storage
     const gca = new GoogleCloudAdaptor(config.remoteGoogleBucket, config.remotePath);
+
+    await cleanupRoutine(gca);
+    const cleanupInterval = setInterval(() => {
+        cleanupRoutine(gca);
+    }, 1000 * 60 * 60 * 24);
+
     const remoteState = await gca.getExistingFiles();
 
     const executor = new ParallelExecutor(2);
@@ -34,6 +41,7 @@ const registerGracefulShutdown = (shutdownFunc: (reason: string) => void) => {
         console.log(new Date(), 'Doing shutdown...', reason);
         executor.shutdown();
         sm.shutdown();
+        clearInterval(cleanupInterval);
     }
 
     // TODO: This has proven to be an issue with the number of file watchers.

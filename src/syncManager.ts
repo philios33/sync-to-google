@@ -105,9 +105,17 @@ export default class SyncManager {
             const day = parseInt(matches[3] || '');
             const createdDate = new Date(year, month - 1, day);
             const ageSecs = Math.round((now.getTime() - createdDate.getTime()) / 1000);
-            console.log(relativeFilePath, createdDate, ageSecs);
-        } else {
-            console.log('Did not match regexp: ' + relativeFilePath);
+            const ageDays = ageSecs / 60 / 60 / 24;
+
+            // We consider anything older than 14 days ancient and not worthy of being stored online
+            // BUT we don't want to delete files after exactly 14 days, but rather just drop all files within
+            // a date that is older than 14 days. E.g. If time is 2pm on 15th, we want to keep at least 14 days
+            // so we can't delete 1st until we are in to the 16th
+            // Basically, the time distance needs to be at least 15.0 days from 1st 00:00 
+            if (ageDays > 15) {
+                console.log('Ignoring ancient file', relativeFilePath);
+                return;
+            }
         }
 
         // Read the size and last modified time of this file and POST back as an event.
