@@ -19,7 +19,7 @@ export async function cleanupRoutine(gca: GoogleCloudAdaptor, executor: Parallel
     const latestDeleteCandidate = new Date();
     latestDeleteCandidate.setDate(latestDeleteCandidate.getDate() - deleteVideosOlderThanDays);
 
-    const daysToDeleteFor = 7;
+    const daysToDeleteFor = 14;
     for (let d=0; d<daysToDeleteFor; d++) {
         latestDeleteCandidate.setDate(latestDeleteCandidate.getDate() - 1);
         const deletionDate = latestDeleteCandidate.getFullYear() + '-' + twoCharStr(latestDeleteCandidate.getMonth() + 1) + '-' + twoCharStr(latestDeleteCandidate.getDate());
