@@ -28,7 +28,7 @@ export default class ParallelExecutor {
 
         this.interval = setInterval(async () => {
             this.cycle();
-        }, 10 * 1000);
+        }, 2 * 1000);
         this.cycle();
     }
 
